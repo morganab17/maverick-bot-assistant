@@ -267,95 +267,209 @@ const SUPABASE_CONFIG = {
  table: "places",
  pageSize: 20
 };
+
 const $ = id => document.getElementById(id);
-let rows = [], filtered = [], page = 1, connected = false;
-const validConfig = () =>
- SUPABASE_CONFIG.url.startsWith("https://") &&
- !SUPABASE_CONFIG.url.includes("YOUR_PROJECT") &&
- SUPABASE_CONFIG.key.startsWith("sb_publishable_") &&
- !SUPABASE_CONFIG.key.includes("YOUR_PUBLIC_KEY");
-function status(message,type=""){
- $("dbStatus").className = "connection " + type;
- $("dbStatus").textContent = "● " + message;
+let page = 1, totalRecords = 0, requestController = null;
+
+const columns = [
+  "id", "title", "category_name", "street",
+  "city", "state", "total_score",
+  "reviews_count", "phone", "website", "url"
+];
+
+function status(message, type = "") {
+  $("dbStatus").className = "connection " + type;
+  $("dbStatus").textContent = "● " + message;
 }
-function message(value){
- $("placesList").replaceChildren();
- const el = document.createElement("div");
- el.className = "message";
- el.textContent = value;
- $("placesList").appendChild(el);
+
+function message(value) {
+  $("placesList").replaceChildren();
+  const el = document.createElement("div");
+  el.className = "message";
+  el.textContent = value;
+  $("placesList").appendChild(el);
 }
-function make(tag,cls,value){
- const el = document.createElement(tag);
- el.className = cls;
- el.textContent = String(value ?? "");
- return el;
+
+function make(tag, cls, value) {
+  const el = document.createElement(tag);
+  el.className = cls;
+  el.textContent = String(value ?? "");
+  return el;
 }
-function render(){
- const total = Math.max(1,Math.ceil(filtered.length/SUPABASE_CONFIG.pageSize));
- page = Math.min(Math.max(page,1),total);
- const start = (page-1)*SUPABASE_CONFIG.pageSize;
- const current = filtered.slice(start,start+SUPABASE_CONFIG.pageSize);
- $("placesList").replaceChildren();
- if(!current.length) message("No places found.");
- current.forEach(row=>{
-  const card = make("article","place-card","");
-  const title = row.name ?? row.nama ?? row.title ?? row.place_name ?? "Place";
-  card.appendChild(make("h3","",title));
-  Object.entries(row).slice(0,12).forEach(([key,value])=>{
-   if(value===null || typeof value==="object") return;
-   const line = make("div","field","");
-   line.append(make("b","",key),make("span","",value));
-   card.appendChild(line);
+
+function addField(card, label, value) {
+  if (value === null || value === undefined || value === "") return;
+  const field = make("div", "field", "");
+  field.append(make("b", "", label), make("span", "", value));
+  card.appendChild(field);
+}
+
+function safeLink(value) {
+  try {
+    const link = new URL(value);
+    return ["https:", "http:"].includes(link.protocol) ? link.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function addLink(card, label, value) {
+  if (!value) return;
+  const href = safeLink(value);
+  if (!href) return;
+  const field = make("div", "field", "");
+  const anchor = make("a", "", label + " ↗");
+  anchor.href = href;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.style.color = "#2563eb";
+  field.appendChild(anchor);
+  card.appendChild(field);
+}
+
+function renderPlaces(data) {
+  $("placesList").replaceChildren();
+
+  if (!data.length) {
+    message("No places found.");
+  }
+
+  data.forEach(place => {
+    const card = make("article", "place-card", "");
+    card.appendChild(make("h3", "", place.title || "Untitled Place"));
+
+    addField(card, "Category", place.category_name);
+    addField(card, "Street", place.street);
+    addField(card, "City", place.city);
+    addField(card, "State", place.state);
+    addField(card, "Rating", place.total_score);
+    addField(card, "Reviews", place.reviews_count);
+    addField(card, "Phone", place.phone);
+    addLink(card, "Visit Website", place.website);
+    addLink(card, "View Place", place.url);
+
+    $("placesList").appendChild(card);
   });
-  $("placesList").appendChild(card);
- });
- $("recordCount").textContent = filtered.length + " records in loaded dataset";
- $("pageLabel").textContent = "Page "+page+" / "+total;
- $("prevBtn").disabled = page<=1;
- $("nextBtn").disabled = page>=total;
+
+  const totalPages = Math.max(
+    1, Math.ceil(totalRecords / SUPABASE_CONFIG.pageSize)
+  );
+
+  $("recordCount").textContent =
+    totalRecords + " matching records";
+
+  $("pageLabel").textContent =
+    "Page " + page + " / " + totalPages;
+
+  $("prevBtn").disabled = page <= 1;
+  $("nextBtn").disabled = page >= totalPages;
 }
-function filterPlaces(){
- const q = $("placeSearch").value.toLocaleLowerCase().trim();
- filtered = rows.filter(row=>Object.values(row).some(value=>
-  typeof value==="string" && value.toLocaleLowerCase().includes(q)));
- page=1;render();
+
+async function loadPlaces() {
+  if (requestController) requestController.abort();
+
+  const {url, key, table, pageSize} = SUPABASE_CONFIG;
+
+  if (!url.startsWith("https://") ||
+      url.includes("YOUR_PROJECT_ID") ||
+      !key.startsWith("sb_publishable_") ||
+      key.includes("YOUR_PUBLIC_KEY")) {
+    status("Configuration required", "error");
+    message("Check Supabase URL and Publishable Key.");
+    return;
+  }
+
+  const controller = new AbortController();
+  requestController = controller;
+
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  status("Searching Supabase...");
+  message("Loading places...");
+
+  const keyword = $("placeSearch").value.trim();
+
+  const params = new URLSearchParams();
+  params.set("select", columns.join(","));
+  params.set("order", "title.asc,id.asc");
+  params.set("limit", pageSize);
+  params.set("offset", (page - 1) * pageSize);
+
+  if (keyword) {
+    const escaped = keyword.replace(/[\\%_*]/g, "\\$&");
+    params.set("title", "ilike.*" + escaped + "*");
+  }
+
+  const endpoint =
+    url.replace(/\/$/, "") +
+    "/rest/v1/" + table + "?" + params.toString();
+
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: key,
+        Accept: "application/json",
+        Prefer: "count=exact"
+      },
+      signal: controller.signal
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error("HTTP " + response.status + ": " +
+        detail.slice(0, 250));
+    }
+
+    const data = await response.json();
+    const range = response.headers.get("content-range");
+    const count = range?.split("/")[1];
+
+    if (!Array.isArray(data)) throw new Error("Invalid data response");
+
+    totalRecords = count && count !== "*"
+      ? Number(count) : data.length;
+
+    status("Connected to Supabase", "online");
+    renderPlaces(data);
+
+  } catch (error) {
+    if (error.name !== "AbortError") {
+      status("Connection failed", "error");
+      message("Failed to load places: " + error.message);
+    }
+  } finally {
+    clearTimeout(timeout);
+    if (requestController === controller) requestController = null;
+  }
 }
-async function loadPlaces(){
- if(!validConfig()){
-  status("Configuration required","error");
-  message("Add your Supabase Project URL and Publishable Key in SUPABASE_CONFIG.");
-  return;
- }
- status("Connecting...");
- message("Loading places...");
- const {url,key,table}=SUPABASE_CONFIG;
- const endpoint=url.replace(/\/$/,"")+"/rest/v1/"+table+"?select=*&limit=1000";
- const controller=new AbortController();
- const timeout=setTimeout(()=>controller.abort(),12000);
- try{
-  const response=await fetch(endpoint,{
-   headers:{"apikey":key,"Accept":"application/json"},
-   signal:controller.signal
-  });
-  if(!response.ok)throw new Error("HTTP "+response.status);
-  const data=await response.json();
-  if(!Array.isArray(data))throw new Error("Invalid response format");
-  rows=data;connected=true;
-  status("Connected to Supabase","online");
-  filterPlaces();
- }catch(err){
-  connected=false;rows=[];filtered=[];
-  status("Connection failed","error");
-  const detail=err.name==="AbortError"?"Request timeout":err.message;
-  message("Unable to load places: "+detail);
- }finally{clearTimeout(timeout)}
+
+function searchPlaces() {
+  page = 1;
+  loadPlaces();
 }
-$("searchBtn").addEventListener("click",filterPlaces);
-$("placeSearch").addEventListener("input",filterPlaces);
-$("refreshBtn").addEventListener("click",loadPlaces);
-$("prevBtn").addEventListener("click",()=>{page--;render()});
-$("nextBtn").addEventListener("click",()=>{page++;render()});
+
+$("searchBtn").addEventListener("click", searchPlaces);
+
+$("placeSearch").addEventListener("keydown", event => {
+  if (event.key === "Enter") searchPlaces();
+});
+
+$("refreshBtn").addEventListener("click", loadPlaces);
+
+$("prevBtn").addEventListener("click", () => {
+  if (page > 1) {
+    page--;
+    loadPlaces();
+  }
+});
+
+$("nextBtn").addEventListener("click", () => {
+  if (page * SUPABASE_CONFIG.pageSize < totalRecords) {
+    page++;
+    loadPlaces();
+  }
+});
+
 const scenarios={
  summary:["Ringkas dokumen saya menjadi executive summary.",
  "Saya dapat membantu menyusun:\n1. Executive Summary\n2. Key Findings\n3. Risks\n4. Recommended Actions\n\nSilakan berikan dokumennya."],
