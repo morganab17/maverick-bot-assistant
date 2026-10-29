@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Maverick AI - Research, Documents and Places">
+<title>Maverick | AI Thinking Partner</title>
+<style>
+:root{--blue:#2563eb;--navy:#12233f;--ink:#334155;--muted:#64748b;--line:#e2e8f0;--bg:#f7f9fc}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
+a{text-decoration:none;color:inherit}
+button,input{font:inherit}
+button{cursor:pointer}
+.container{max-width:1100px;margin:auto;padding:0 22px}
+section{padding:75px 0}
+h1,h2,h3{color:var(--navy);line-height:1.2}
+h1{font-size:clamp(40px,6vw,66px);margin:16px 0}
+h2{font-size:clamp(27px,4vw,36px);margin:12px 0}
+h3{font-size:19px}
+p{color:var(--muted)}
+.center{text-align:center}
+.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);font-weight:800}
+.intro{max-width:690px;margin:12px auto 36px}
+nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.nav-inner{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{font-size:20px;font-weight:850;color:var(--navy)}
+.mark{background:var(--blue);color:white;padding:7px 12px;border-radius:10px;margin-right:8px}
+.nav-links{display:flex;align-items:center;gap:20px;font-size:13px}
+.nav-links a:hover{color:var(--blue)}
+.btn{border:0;border-radius:11px;padding:13px 21px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;transition:.2s}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#1d4ed8;transform:translateY(-2px)}
+.btn-outline{background:#fff;border:1px solid #cbd5e1;color:var(--navy)}
+.btn-outline:hover{background:#eff6ff}
+.hero{background:linear-gradient(125deg,#fff,#eaf3ff);padding:90px 0}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:45px;align-items:center}
+.hero h1 span{color:var(--blue)}
+.hero-copy{font-size:17px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:27px}
+.status{display:inline-flex;align-items:center;background:#ecfdf5;color:#15803d;padding:8px 14px;border-radius:30px;font-size:12px;font-weight:750}
+.dot{width:9px;height:9px;background:#22c55e;border-radius:50%;display:inline-block;margin-right:9px;box-shadow:0 0 0 5px #bbf7d0}
+.avatar-card,.card,.data-panel,.chat-panel{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 35px #0f172a0c}
+.avatar-card{text-align:center;padding:45px 22px}
+.avatar{width:145px;height:145px;background:linear-gradient(135deg,#2563eb,#60a5fa);border-radius:30px;margin:0 auto 20px;display:grid;place-items:center;color:white;font-size:75px;font-weight:900}
+.avatar-title{font-size:22px;font-weight:800;color:var(--navy)}
+.chips,.tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.chip,.tag{background:#eff6ff;color:#1d4ed8;padding:6px 10px;border-radius:25px;font-size:11px;font-weight:700}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.card{padding:28px}
+.problem{border-top:4px solid #f87171}
+.solution{border-top:4px solid #22c55e}
+.item{padding:15px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item strong{color:var(--navy)}
+.item p{font-size:14px;margin:5px 0 0}
+.features-section,.places-section{background:#eef3fa}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-icon{width:52px;height:52px;background:#eff6ff;color:var(--blue);display:grid;place-items:center;border-radius:12px;font-size:27px}
+.feature p{font-size:14px}
+.tags{justify-content:flex-start}
+.data-panel{padding:25px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+.search-input{flex:1;min-width:180px;border:1px solid #cbd5e1;border-radius:11px;padding:12px 15px;outline:none}
+.search-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #dbeafe}
+.connection{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:25px;font-size:12px;font-weight:700;background:#f1f5f9;color:#475569}
+.connection.online{background:#dcfce7;color:#166534}
+.connection.error{background:#fee2e2;color:#b91c1c}
+.records{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:20px}
+.place-card{border:1px solid var(--line);padding:18px;border-radius:13px;background:#fff;min-width:0}
+.place-card h3{margin:0 0 12px;font-size:17px;overflow-wrap:anywhere}
+.field{display:flex;gap:8px;padding:5px 0;font-size:13px;overflow-wrap:anywhere}
+.field b{min-width:105px;max-width:40%;color:#64748b;flex-shrink:0}
+.field span{min-width:0;white-space:pre-wrap}
+.message{text-align:center;padding:22px;color:var(--muted)}
+.pagination{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:20px}
+.pagination button:disabled{opacity:.45;cursor:not-allowed}
+.demo-wrap{max-width:790px;margin:auto}
+.chat-panel{overflow:hidden}
+.chat-header{background:var(--navy);color:#fff;padding:17px 22px;font-weight:700}
+.chat-header small{color:#bfdbfe;font-weight:400;display:block}
+.chat-body{height:310px;overflow-y:auto;background:#f8fafc;padding:22px;display:flex;flex-direction:column;gap:14px}
+.bubble{max-width:87%;padding:13px 16px;border-radius:15px;font-size:14px;white-space:pre-line;animation:appear .3s}
+.bubble.agent{align-self:flex-start;background:#fff;border:1px solid var(--line)}
+.bubble.user{align-self:flex-end;background:var(--blue);color:#fff}
+@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.typing{color:#64748b;font-size:13px;padding:12px}
+.scenarios{padding:20px;border-top:1px solid var(--line);display:flex;gap:9px;flex-wrap:wrap}
+.scenario{padding:10px 13px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:9px;font-size:13px}
+.scenario:hover{background:#dbeafe}
+.demo-note{font-size:12px;text-align:center}
+.cta-section{background:var(--navy);text-align:center}
+.cta-section h2{color:#fff}
+.cta-section p{color:#cbd5e1;max-width:600px;margin:15px auto 28px}
+.btn-green{background:#22c55e;color:#052e16}
+footer{background:#0b172b;color:#94a3b8;text-align:center;padding:23px;font-size:12px}
+@media(max-width:760px){
+ .hero-grid,.comparison,.features,.records{grid-template-columns:1fr}
+ .hero{padding:60px 0}
+ section{padding:55px 0}
+ .nav-links a:not(.nav-cta){display:none}
+ .nav-cta{font-size:12px}
+ .avatar-card{max-width:430px;margin:auto;width:100%}
+ .scenarios{flex-direction:column}
+ .scenario{width:100%}
+ .bubble{max-width:95%}
+ .toolbar{flex-direction:column}
+ .search-input{width:100%;flex:auto}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav aria-label="Main navigation">
+ <div class="container nav-inner">
+  <a class="brand" href="#home"><span class="mark">M</span>MAVERICK</a>
+  <div class="nav-links">
+   <a href="#solution">Solutions</a>
+   <a href="#features">Capabilities</a>
+   <a href="#places">Places</a>
+   <a class="btn btn-blue nav-cta" href="#contact">Let's Connect</a>
+  </div>
+ </div>
+</nav>
+<main>
+<section class="hero" id="home">
+ <div class="container hero-grid">
+  <div>
+   <div class="status"><span class="dot"></span>🟢 Status: Active &amp; Ready 24/7</div>
+   <h1>Meet <span>Maverick.</span><br>Your AI Thinking Partner.</h1>
+   <div class="eyebrow">Research · Analyze · Review</div>
+   <p class="hero-copy">Asisten AI yang merangkum dokumen, melakukan research, dan memberikan opini serta review atas tugas yang diberikan.</p>
+   <p>Less Information Overload. More Meaningful Insights.</p>
+   <div class="actions">
+    <a class="btn btn-blue" href="#places">Explore Places →</a>
+    <a class="btn btn-outline" href="#demo">Try AI Simulation</a>
+   </div>
+  </div>
+  <div class="avatar-card">
+   <div class="avatar" aria-label="Maverick avatar">M</div>
+   <div class="avatar-title">MAVERICK AI</div>
+   <p>Intelligent Knowledge Assistant</p>
+   <div class="chips">
+    <span class="chip">Document Intelligence</span>
+    <span class="chip">Smart Research</span>
+    <span class="chip">Human Oversight</span>
+   </div>
+  </div>
+ </div>
+</section>
+<section id="solution">
+ <div class="container">
+  <div class="center">
+   <div class="eyebrow">The Challenge &amp; The Answer</div>
+   <h2>From Information Chaos to Clarity</h2>
+   <p class="intro">Ubah informasi kompleks menjadi insight yang relevan dan actionable.</p>
+  </div>
+  <div class="comparison">
+   <article class="card problem">
+    <h3>✕ The Chaos</h3>
+    <div class="item"><strong>Information Overload</strong><p>Sumber informasi terlalu banyak dan sering kurang relevan.</p></div>
+    <div class="item"><strong>Unfocused Context</strong><p>Konteks terlalu luas dan tidak menjawab kebutuhan.</p></div>
+    <div class="item"><strong>Complex Deliverables</strong><p>Dokumen yang dihasilkan masih sulit dipahami.</p></div>
+   </article>
+   <article class="card solution">
+    <h3>✓ The Solution</h3>
+    <div class="item"><strong>Relevant Knowledge</strong><p>Merangkum dan memprioritaskan informasi penting.</p></div>
+    <div class="item"><strong>Contextual Research</strong><p>Riset terarah berdasarkan tujuan pekerjaan.</p></div>
+    <div class="item"><strong>Actionable Review</strong><p>Memberikan opini dan evaluasi dengan persetujuan manusia.</p></div>
+   </article>
+  </div>
+ </div>
+</section>
+<section class="features-section" id="features">
+ <div class="container">
+  <div class="center">
+   <div class="eyebrow">Core Capabilities</div>
+   <h2>Three Powerful Capabilities</h2>
+   <p class="intro">Designed for smarter work and better decisions.</p>
+  </div>
+  <div class="features">
+   <article class="card feature">
+    <div class="feature-icon">▤</div>
+    <h3>Document Intelligence</h3>
+    <p>Ringkas dokumen panjang dan jelaskan informasi kompleks secara terstruktur.</p>
+    <div class="tags"><span class="tag">Summarization</span><span class="tag">Google Drive Ready</span></div>
+   </article>
+   <article class="card feature">
+    <div class="feature-icon">⌕</div>
+    <h3>Smart Research</h3>
+    <p>Lakukan riset kontekstual dan telusuri informasi berdasarkan kebutuhan.</p>
+    <div class="tags"><span class="tag">Research</span><span class="tag">Supabase Places</span></div>
+   </article>
+   <article class="card feature">
+    <div class="feature-icon">✓</div>
+    <h3>Expert Review &amp; Approval</h3>
+    <p>Evaluasi tugas, identifikasi risiko, dan ajukan rekomendasi melalui Human-in-the-Loop.</p>
+    <div class="tags"><span class="tag">HITL</span><span class="tag">WhatsApp Ready</span></div>
+   </article>
+  </div>
+ </div>
+</section>
+<section class="places-section" id="places">
+ <div class="container">
+  <div class="center">
+   <div class="eyebrow">Supabase Integration</div>
+   <h2>Places Explorer</h2>
+   <p class="intro">Explore location data from the Maverick Knowledge Database.</p>
+  </div>
+  <div class="data-panel">
+   <div class="connection" id="dbStatus" role="status">● Not connected</div>
+   <div class="toolbar">
+    <input class="search-input" id="placeSearch" type="search" placeholder="Search places..." aria-label="Search places">
+    <button class="btn btn-blue" id="searchBtn">Search</button>
+    <button class="btn btn-outline" id="refreshBtn">↻ Refresh</button>
+   </div>
+   <div id="recordCount" style="font-size:13px;color:#64748b"></div>
+   <div class="records" id="placesList" aria-live="polite"></div>
+   <div class="pagination">
+    <button class="btn btn-outline" id="prevBtn" disabled>← Prev</button>
+    <span id="pageLabel">Page 1</span>
+    <button class="btn btn-outline" id="nextBtn" disabled>Next →</button>
+   </div>
+   <p class="demo-note">Public read-only access · Source: Supabase public.places</p>
+  </div>
+ </div>
+</section>
+<section id="demo">
+ <div class="container demo-wrap">
+  <div class="center">
+   <div class="eyebrow">Interactive Simulation</div>
+   <h2>Experience Maverick in Action</h2>
+   <p class="intro">Pilih skenario untuk mencoba simulasi percakapan.</p>
+  </div>
+  <div class="chat-panel">
+   <div class="chat-header">M · Maverick AI Assistant<small>● Simulation Mode</small></div>
+   <div class="chat-body" id="chat" role="log" aria-live="polite">
+    <div class="bubble agent">Halo! Saya Maverick. Pilih skenario untuk melihat cara saya membantu pekerjaan Anda.</div>
+   </div>
+   <div class="scenarios">
+    <button class="scenario" data-scenario="summary">▤ Summarize Document</button>
+    <button class="scenario" data-scenario="research">⌕ Deep Research</button>
+    <button class="scenario" data-scenario="review">✓ Review &amp; Approval</button>
+   </div>
+  </div>
+  <p class="demo-note">Simulated responses only. Tidak melakukan analisis AI secara langsung.</p>
+ </div>
+</section>
+<section class="cta-section" id="contact">
+ <div class="container">
+  <div class="eyebrow" style="color:#93c5fd">Ready to Work Smarter?</div>
+  <h2>Turn Information into Better Decisions.</h2>
+  <p>Diskusikan bagaimana Maverick membantu menyederhanakan riset, memahami dokumen, dan meningkatkan kualitas pekerjaan.</p>
+  <a class="btn btn-green" href="https://wa.me/6287871313285" target="_blank" rel="noopener noreferrer">Connect via WhatsApp →</a>
+ </div>
+</section>
+</main>
+<footer>© 2026 Maverick AI · Built with AI · AI Builder Bootcamp Showcase</footer>
+<script>
+"use strict";
+// SUPABASE CONFIGURATION: replace these two values.
+const SUPABASE_CONFIG = {
+ url: "https://YOUR_PROJECT_ID.supabase.co",
+ key: "sb_publishable_YOUR_PUBLIC_KEY",
+ table: "places",
+ pageSize: 20
+};
+const $ = id => document.getElementById(id);
+let rows = [], filtered = [], page = 1, connected = false;
+const validConfig = () =>
+ SUPABASE_CONFIG.url.startsWith("https://") &&
+ !SUPABASE_CONFIG.url.includes("YOUR_PROJECT") &&
+ SUPABASE_CONFIG.key.startsWith("sb_publishable_") &&
+ !SUPABASE_CONFIG.key.includes("YOUR_PUBLIC_KEY");
+function status(message,type=""){
+ $("dbStatus").className = "connection " + type;
+ $("dbStatus").textContent = "● " + message;
+}
+function message(value){
+ $("placesList").replaceChildren();
+ const el = document.createElement("div");
+ el.className = "message";
+ el.textContent = value;
+ $("placesList").appendChild(el);
+}
+function make(tag,cls,value){
+ const el = document.createElement(tag);
+ el.className = cls;
+ el.textContent = String(value ?? "");
+ return el;
+}
+function render(){
+ const total = Math.max(1,Math.ceil(filtered.length/SUPABASE_CONFIG.pageSize));
+ page = Math.min(Math.max(page,1),total);
+ const start = (page-1)*SUPABASE_CONFIG.pageSize;
+ const current = filtered.slice(start,start+SUPABASE_CONFIG.pageSize);
+ $("placesList").replaceChildren();
+ if(!current.length) message("No places found.");
+ current.forEach(row=>{
+  const card = make("article","place-card","");
+  const title = row.name ?? row.nama ?? row.title ?? row.place_name ?? "Place";
+  card.appendChild(make("h3","",title));
+  Object.entries(row).slice(0,12).forEach(([key,value])=>{
+   if(value===null || typeof value==="object") return;
+   const line = make("div","field","");
+   line.append(make("b","",key),make("span","",value));
+   card.appendChild(line);
+  });
+  $("placesList").appendChild(card);
+ });
+ $("recordCount").textContent = filtered.length + " records in loaded dataset";
+ $("pageLabel").textContent = "Page "+page+" / "+total;
+ $("prevBtn").disabled = page<=1;
+ $("nextBtn").disabled = page>=total;
+}
+function filterPlaces(){
+ const q = $("placeSearch").value.toLocaleLowerCase().trim();
+ filtered = rows.filter(row=>Object.values(row).some(value=>
+  typeof value==="string" && value.toLocaleLowerCase().includes(q)));
+ page=1;render();
+}
+async function loadPlaces(){
+ if(!validConfig()){
+  status("Configuration required","error");
+  message("Add your Supabase Project URL and Publishable Key in SUPABASE_CONFIG.");
+  return;
+ }
+ status("Connecting...");
+ message("Loading places...");
+ const {url,key,table}=SUPABASE_CONFIG;
+ const endpoint=url.replace(/\/$/,"")+"/rest/v1/"+table+"?select=*&limit=1000";
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),12000);
+ try{
+  const response=await fetch(endpoint,{
+   headers:{"apikey":key,"Accept":"application/json"},
+   signal:controller.signal
+  });
+  if(!response.ok)throw new Error("HTTP "+response.status);
+  const data=await response.json();
+  if(!Array.isArray(data))throw new Error("Invalid response format");
+  rows=data;connected=true;
+  status("Connected to Supabase","online");
+  filterPlaces();
+ }catch(err){
+  connected=false;rows=[];filtered=[];
+  status("Connection failed","error");
+  const detail=err.name==="AbortError"?"Request timeout":err.message;
+  message("Unable to load places: "+detail);
+ }finally{clearTimeout(timeout)}
+}
+$("searchBtn").addEventListener("click",filterPlaces);
+$("placeSearch").addEventListener("input",filterPlaces);
+$("refreshBtn").addEventListener("click",loadPlaces);
+$("prevBtn").addEventListener("click",()=>{page--;render()});
+$("nextBtn").addEventListener("click",()=>{page++;render()});
+const scenarios={
+ summary:["Ringkas dokumen saya menjadi executive summary.",
+ "Saya dapat membantu menyusun:\n1. Executive Summary\n2. Key Findings\n3. Risks\n4. Recommended Actions\n\nSilakan berikan dokumennya."],
+ research:["Saya membutuhkan riset yang fokus dan relevan.",
+ "Research Framework:\n1. Scope & Objectives\n2. Relevant Sources\n3. Evidence & Insights\n4. Alternative Perspectives\n5. Recommendations\n\nApa topik riset Anda?"],
+ review:["Review tugas saya sebelum disetujui.",
+ "Review Framework:\n1. Kesesuaian tujuan\n2. Akurasi informasi\n3. Risiko dan gap\n4. Rekomendasi\n\nHuman approval is required before further action."]
+};
+let chatTimer;
+function addBubble(value,role){
+ const bubble=make("div","bubble "+role,value);
+ $("chat").appendChild(bubble);
+ $("chat").scrollTop=$("chat").scrollHeight;
+}
+function simulate(key){
+ clearTimeout(chatTimer);
+ const pair=scenarios[key];
+ if(!pair)return;
+ $("chat").replaceChildren();
+ addBubble(pair[0],"user");
+ const typing=make("div","typing","Maverick is typing ● ● ●");
+ $("chat").appendChild(typing);
+ chatTimer=setTimeout(()=>{
+  typing.remove();
+  addBubble(pair[1],"agent");
+ },1200);
+}
+document.querySelectorAll("[data-scenario]").forEach(button=>
+ button.addEventListener("click",()=>simulate(button.dataset.scenario)));
+loadPlaces();
+</script>
+</body>
+</html>
